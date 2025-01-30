@@ -76,3 +76,6 @@
     {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {159, 4, 45}, {0, 0, 0}},
     {{0, 0, 0}, {159, 4, 45}, {159, 4, 45}, {159, 4, 45}, {0, 0, 0}}
     };
+
+    int (*matrizes[10])[5][3] = {matriz0, matriz1, matriz2, matriz3, matriz4, 
+                             matriz5, matriz6, matriz7, matriz8, matriz9};

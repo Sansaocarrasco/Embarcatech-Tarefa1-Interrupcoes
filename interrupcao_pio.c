@@ -11,6 +11,7 @@
 #define LED_COUNT 25
 #define LED_PIN 7
 #define BUTTON_A 5 // Botão "A" na GPIO 5
+#define BUTTON_B 6 // Botão "B" na GPIO 6
 
 // Definição de pixel GRB
 struct pixel_t
@@ -122,13 +123,21 @@ void npDrawMatrix(int matriz[5][5][3]) {
 
 void button_callback(uint gpio, uint32_t events) {
     if (gpio == BUTTON_A) {
-        numero_atual = (numero_atual + 1) % 10; // Alterna entre 0 e 9
+      if (numero_atual == 9){
+        numero_atual = 0;
+      }
+      else numero_atual = numero_atual + 1; // Alterna entre 0 e 9
+    }
+    if (gpio == BUTTON_B) {
+      if (numero_atual == 0){
+        numero_atual = 9;
+      }
+      else numero_atual = numero_atual - 1; // Alterna entre 0 e 9
     }
 }
 
 int main()
 {
-
   // Inicializa entradas e saídas.
   stdio_init_all();
 
@@ -140,25 +149,22 @@ int main()
   gpio_set_dir(BUTTON_A, GPIO_IN);
   gpio_pull_up(BUTTON_A);
 
+  gpio_init(BUTTON_B);
+  gpio_set_dir(BUTTON_B, GPIO_IN);
+  gpio_pull_up(BUTTON_B);
+
   // Configura interrupção na borda de descida (pressionamento)
   gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_FALL, true, &button_callback);
+
+  // Configura interrupção na borda de descida (pressionamento)
+  gpio_set_irq_enabled_with_callback(BUTTON_B, GPIO_IRQ_EDGE_FALL, true, &button_callback);
+
   // Dando um clear pra não ter problemas de lixo na tela
   npClear();
 
  // Loop Principal de execução
   while (true) {
-        switch (numero_atual) {
-            case 0: npDrawMatrix(matriz0); break;
-            case 1: npDrawMatrix(matriz1); break;
-            case 2: npDrawMatrix(matriz2); break;
-            case 3: npDrawMatrix(matriz3); break;
-            case 4: npDrawMatrix(matriz4); break;
-            case 5: npDrawMatrix(matriz5); break;
-            case 6: npDrawMatrix(matriz6); break;
-            case 7: npDrawMatrix(matriz7); break;
-            case 8: npDrawMatrix(matriz8); break;
-            case 9: npDrawMatrix(matriz9); break;
-        }
-        sleep_ms(100); // Pequeno delay para evitar atualização excessiva
-    }
+    npDrawMatrix(matrizes[numero_atual]); // Usa o índice para acessar a matriz correta
+    sleep_ms(100); // Pequeno delay para evitar atualização excessiva
+  }
 }
