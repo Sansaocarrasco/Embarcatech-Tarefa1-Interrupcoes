@@ -10,6 +10,7 @@
 // Definição do número de LEDs e pino.
 #define LED_COUNT 25
 #define LED_PIN 7
+#define BUTTON_A 5 // Botão "A" na GPIO 5
 
 // Definição de pixel GRB
 struct pixel_t
@@ -25,6 +26,9 @@ npLED_t leds[LED_COUNT];
 // Variáveis para uso da máquina PIO.
 PIO np_pio;
 uint sm;
+
+// Variável global para armazenar o número atual
+volatile int numero_atual = 0;
 
 /**
  * Inicializa a máquina PIO para controle da matriz de LEDs.
@@ -116,6 +120,12 @@ void npDrawMatrix(int matriz[5][5][3]) {
     npWrite();
 }
 
+void button_callback(uint gpio, uint32_t events) {
+    if (gpio == BUTTON_A) {
+        numero_atual = (numero_atual + 1) % 10; // Alterna entre 0 e 9
+    }
+}
+
 int main()
 {
 
@@ -124,47 +134,31 @@ int main()
 
   // Inicializa matriz de LEDs NeoPixel.
   npInit(LED_PIN);
+
+  // Iniciando os botões
+  gpio_init(BUTTON_A);
+  gpio_set_dir(BUTTON_A, GPIO_IN);
+  gpio_pull_up(BUTTON_A);
+
+  // Configura interrupção na borda de descida (pressionamento)
+  gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_FALL, true, &button_callback);
+  // Dando um clear pra não ter problemas de lixo na tela
   npClear();
 
-  while (true)
-  {
-    npDrawMatrix(matriz0);
-    sleep_ms(2000);
-    
-    npClear();
-    npDrawMatrix(matriz1);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz2);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz3);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz4);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz5);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz6);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz7);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz8);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz9);
-    sleep_ms(2000);
-  }
+ // Loop Principal de execução
+  while (true) {
+        switch (numero_atual) {
+            case 0: npDrawMatrix(matriz0); break;
+            case 1: npDrawMatrix(matriz1); break;
+            case 2: npDrawMatrix(matriz2); break;
+            case 3: npDrawMatrix(matriz3); break;
+            case 4: npDrawMatrix(matriz4); break;
+            case 5: npDrawMatrix(matriz5); break;
+            case 6: npDrawMatrix(matriz6); break;
+            case 7: npDrawMatrix(matriz7); break;
+            case 8: npDrawMatrix(matriz8); break;
+            case 9: npDrawMatrix(matriz9); break;
+        }
+        sleep_ms(100); // Pequeno delay para evitar atualização excessiva
+    }
 }
