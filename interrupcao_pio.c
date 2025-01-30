@@ -13,6 +13,12 @@
 #define BUTTON_A 5 // Botão "A" na GPIO 5
 #define BUTTON_B 6 // Botão "B" na GPIO 6
 
+//LEDs RGB
+#define LED_RGB1_PIN 11
+#define LED_RGB2_PIN 12
+#define LED_RGB3_PIN 13
+
+
 // Definição de pixel GRB
 struct pixel_t
 {
@@ -27,6 +33,15 @@ npLED_t leds[LED_COUNT];
 // Variáveis para uso da máquina PIO.
 PIO np_pio;
 uint sm;
+
+// Declaração do buffer de pixels que formam a matriz RGB.
+npLED_t leds1[LED_COUNT]; // Buffer para LED RGB no pino 11
+npLED_t leds2[LED_COUNT]; // Buffer para LED RGB no pino 12
+npLED_t leds3[LED_COUNT]; // Buffer para LED RGB no pino 13
+
+// Variáveis para a máquina PIO dos LEDs RGB
+PIO np_pio1, np_pio2, np_pio3;
+uint sm1, sm2, sm3;
 
 // Variável global para armazenar o número atual
 volatile int numero_atual = 0;
@@ -59,6 +74,21 @@ void npInit(uint pin)
     leds[i].G = 0;
     leds[i].B = 0;
   }
+}
+
+// Máquina de PIO extra para os LEDs RGB
+
+void npInitExtra(PIO *pio, uint *sm, uint pin) {
+    uint offset = pio_add_program(pio0, &ws2818b_program);
+    *pio = pio0;
+
+    *sm = pio_claim_unused_sm(*pio, false);
+    if (*sm < 0) {
+        *pio = pio1;
+        *sm = pio_claim_unused_sm(*pio, true);
+    }
+
+    ws2818b_program_init(*pio, *sm, offset, pin, 800000.f);
 }
 
 /**
@@ -120,7 +150,7 @@ void npDrawMatrix(int matriz[5][5][3]) {
     }
     npWrite();
 }
-
+// Função de callback para o botão
 void button_callback(uint gpio, uint32_t events) {
     if (gpio == BUTTON_A) {
       if (numero_atual == 9){
@@ -136,6 +166,29 @@ void button_callback(uint gpio, uint32_t events) {
     }
 }
 
+//Função para piscar o LED vermelho
+void piscarLEDVermelho(npLED_t *leds, PIO pio, uint sm) {
+    static bool estado = false; // Estado do LED (ligado/desligado)
+
+    for (uint i = 0; i < LED_COUNT; i++) {
+        if (estado) {
+            leds[i].R = 255;  // Liga o vermelho
+        } else {
+            leds[i].R = 0;    // Desliga o vermelho
+        }
+    }
+
+    estado = !estado; // Alterna estado
+
+    // Enviar os dados para os LEDs
+    for (uint i = 0; i < LED_COUNT; i++) {
+        pio_sm_put_blocking(pio, sm, leds[i].G); // Mantém o verde inalterado
+        pio_sm_put_blocking(pio, sm, leds[i].R); // Atualiza apenas o vermelho
+        pio_sm_put_blocking(pio, sm, leds[i].B); // Mantém o azul inalterado
+    }
+    sleep_us(100); // Reset
+}
+
 int main()
 {
   // Inicializa entradas e saídas.
@@ -143,6 +196,11 @@ int main()
 
   // Inicializa matriz de LEDs NeoPixel.
   npInit(LED_PIN);
+
+  // Inicializa os LEDs RGB.
+  npInitExtra(&np_pio1, &sm1, LED_RGB1_PIN);
+  npInitExtra(&np_pio2, &sm2, LED_RGB2_PIN);
+  npInitExtra(&np_pio3, &sm3, LED_RGB3_PIN);
 
   // Iniciando os botões
   gpio_init(BUTTON_A);
@@ -165,6 +223,9 @@ int main()
  // Loop Principal de execução
   while (true) {
     npDrawMatrix(matrizes[numero_atual]); // Usa o índice para acessar a matriz correta
+
+    piscarLEDVermelho(leds3, np_pio3, sm3); // Pisca o LED RGB vermelho
+    
     sleep_ms(100); // Pequeno delay para evitar atualização excessiva
   }
 }
