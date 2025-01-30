@@ -26,6 +26,9 @@ npLED_t leds[LED_COUNT];
 PIO np_pio;
 uint sm;
 
+// Variável global para armazenar o número atual
+volatile int numero_atual = 0;
+
 /**
  * Inicializa a máquina PIO para controle da matriz de LEDs.
  */
@@ -126,45 +129,19 @@ int main()
   npInit(LED_PIN);
   npClear();
 
-  while (true)
-  {
-    npDrawMatrix(matriz0);
-    sleep_ms(2000);
-    
-    npClear();
-    npDrawMatrix(matriz1);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz2);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz3);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz4);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz5);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz6);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz7);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz8);
-    sleep_ms(2000);
-
-    npClear();
-    npDrawMatrix(matriz9);
-    sleep_ms(2000);
-  }
+  while (true) {
+        switch (numero_atual) {
+            case 0: npDrawMatrix(matriz0); break;
+            case 1: npDrawMatrix(matriz1); break;
+            case 2: npDrawMatrix(matriz2); break;
+            case 3: npDrawMatrix(matriz3); break;
+            case 4: npDrawMatrix(matriz4); break;
+            case 5: npDrawMatrix(matriz5); break;
+            case 6: npDrawMatrix(matriz6); break;
+            case 7: npDrawMatrix(matriz7); break;
+            case 8: npDrawMatrix(matriz8); break;
+            case 9: npDrawMatrix(matriz9); break;
+        }
+        sleep_ms(100); // Pequeno delay para evitar atualização excessiva
+    }
 }
