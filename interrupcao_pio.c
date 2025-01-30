@@ -2,6 +2,7 @@
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/clocks.h"
+#include "matrizes.c"
 
 // Biblioteca gerada pelo arquivo .pio durante compilação.
 #include "ws2818b.pio.h"
@@ -9,6 +10,8 @@
 // Definição do número de LEDs e pino.
 #define LED_COUNT 25
 #define LED_PIN 7
+#define BUTTON_A 5 // Botão "A" na GPIO 5
+
 
 // Definição de pixel GRB
 struct pixel_t
@@ -104,6 +107,17 @@ int getIndex(int x, int y)
   }
 }
 
+// Função pra desenhar a matriz na matriz de LEDs.
+void npDrawMatrix(int matriz[5][5][3]) {
+    for (int linha = 0; linha < 5; linha++) {
+        for (int coluna = 0; coluna < 5; coluna++) {
+            int posicao = getIndex(linha, coluna);
+            npSetLED(posicao, matriz[coluna][linha][0], matriz[coluna][linha][1], matriz[coluna][linha][2]);
+        }
+    }
+    npWrite();
+}
+
 int main()
 {
 
@@ -114,49 +128,45 @@ int main()
   npInit(LED_PIN);
   npClear();
 
-  // Aqui, você desenha nos LEDs.
-
-  npWrite(); // Escreve os dados nos LEDs.
-
-  // Não faz mais nada. Loop infinito.
   while (true)
   {
-    int matriz[5][5][3] =
-        {
-            {{0, 0, 0}, {0, 0, 0}, {255, 255, 255}, {0, 0, 0}, {0, 0, 0}},
-            {{0, 0, 0}, {255, 255, 255}, {0, 0, 0}, {255, 255, 255}, {0, 0, 0}},
-            {{255, 255, 255}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {255, 255, 255}},
-            {{0, 0, 0}, {255, 255, 255}, {0, 0, 0}, {255, 255, 255}, {0, 0, 0}},
-            {{0, 0, 0}, {0, 0, 0}, {255, 255, 255}, {0, 0, 0}, {0, 0, 0}}};
-
-    // Desenhando Sprite contido na matriz.c
-    for (int linha = 0; linha < 5; linha++)
-    {
-      for (int coluna = 0; coluna < 5; coluna++)
-      {
-        int posicao = getIndex(linha, coluna);
-        npSetLED(posicao, matriz[coluna][linha][0], matriz[coluna][linha][1], matriz[coluna][linha][2]);
-      }
-    }
-    npWrite();
+    npDrawMatrix(matriz0);
     sleep_ms(2000);
+    
     npClear();
-    int matriz2[5][5][3] =
-        {
-            {{0, 0, 0}, {0, 0, 0}, {79, 177, 243}, {0, 0, 0}, {0, 0, 0}},
-            {{0, 0, 0}, {79, 177, 243}, {79, 177, 243}, {0, 0, 0}, {0, 0, 0}},
-            {{0, 0, 0}, {0, 0, 0}, {79, 177, 243}, {0, 0, 0}, {0, 0, 0}},
-            {{0, 0, 0}, {0, 0, 0}, {79, 177, 243}, {0, 0, 0}, {0, 0, 0}},
-            {{0, 0, 0}, {79, 177, 243}, {79, 177, 243}, {79, 177, 243}, {0, 0, 0}}};
-    for (int linha = 0; linha < 5; linha++)
-    {
-      for (int coluna = 0; coluna < 5; coluna++)
-      {
-        int posicao = getIndex(linha, coluna);
-        npSetLED(posicao, matriz[coluna][linha][0], matriz[coluna][linha][1], matriz[coluna][linha][2]);
-      }
-    }
-    npWrite();
+    npDrawMatrix(matriz1);
+    sleep_ms(2000);
+
+    npClear();
+    npDrawMatrix(matriz2);
+    sleep_ms(2000);
+
+    npClear();
+    npDrawMatrix(matriz3);
+    sleep_ms(2000);
+
+    npClear();
+    npDrawMatrix(matriz4);
+    sleep_ms(2000);
+
+    npClear();
+    npDrawMatrix(matriz5);
+    sleep_ms(2000);
+
+    npClear();
+    npDrawMatrix(matriz6);
+    sleep_ms(2000);
+
+    npClear();
+    npDrawMatrix(matriz7);
+    sleep_ms(2000);
+
+    npClear();
+    npDrawMatrix(matriz8);
+    sleep_ms(2000);
+
+    npClear();
+    npDrawMatrix(matriz9);
     sleep_ms(2000);
   }
 }
