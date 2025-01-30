@@ -10,8 +10,6 @@
 // Definição do número de LEDs e pino.
 #define LED_COUNT 25
 #define LED_PIN 7
-#define BUTTON_A 5 // Botão "A" na GPIO 5
-
 
 // Definição de pixel GRB
 struct pixel_t
