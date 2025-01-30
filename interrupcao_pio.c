@@ -10,6 +10,7 @@
 // Definição do número de LEDs e pino.
 #define LED_COUNT 25
 #define LED_PIN 7
+#define BUTTON_A 5 // Botão "A" na GPIO 5
 
 // Definição de pixel GRB
 struct pixel_t
@@ -119,6 +120,12 @@ void npDrawMatrix(int matriz[5][5][3]) {
     npWrite();
 }
 
+void button_callback(uint gpio, uint32_t events) {
+    if (gpio == BUTTON_A) {
+        numero_atual = (numero_atual + 1) % 10; // Alterna entre 0 e 9
+    }
+}
+
 int main()
 {
 
@@ -127,8 +134,18 @@ int main()
 
   // Inicializa matriz de LEDs NeoPixel.
   npInit(LED_PIN);
+
+  // Iniciando os botões
+  gpio_init(BUTTON_A);
+  gpio_set_dir(BUTTON_A, GPIO_IN);
+  gpio_pull_up(BUTTON_A);
+
+  // Configura interrupção na borda de descida (pressionamento)
+  gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_FALL, true, &button_callback);
+  // Dando um clear pra não ter problemas de lixo na tela
   npClear();
 
+ // Loop Principal de execução
   while (true) {
         switch (numero_atual) {
             case 0: npDrawMatrix(matriz0); break;
