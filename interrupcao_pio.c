@@ -18,6 +18,8 @@
 #define LED_RGB2_PIN 12
 #define LED_RGB3_PIN 13
 
+//Tempo de debounce para corrigir o Bounce
+#define TIME_DEBOUNCE 500
 
 // Definição de pixel GRB
 struct pixel_t
@@ -45,6 +47,10 @@ uint sm1, sm2, sm3;
 
 // Variável global para armazenar o número atual
 volatile int numero_atual = 0;
+
+// Variáveis para armazenar o último tempo de acionamento
+volatile uint32_t last_press_time_A = 0;
+volatile uint32_t last_press_time_B = 0;
 
 /**
  * Inicializa a máquina PIO para controle da matriz de LEDs.
@@ -152,17 +158,26 @@ void npDrawMatrix(int matriz[5][5][3]) {
 }
 // Função de callback para o botão
 void button_callback(uint gpio, uint32_t events) {
+    uint32_t current_time = to_ms_since_boot(get_absolute_time());
     if (gpio == BUTTON_A) {
-      if (numero_atual == 9){
-        numero_atual = 0;
-      }
-      else numero_atual = numero_atual + 1; // Alterna entre 0 e 9
+        if (current_time - last_press_time_A > TIME_DEBOUNCE) {
+            last_press_time_A = current_time; // Atualiza o tempo do último pressionamento
+            if (numero_atual == 9) {
+                numero_atual = 0;
+            } else {
+                numero_atual++;
+            }
+        }
     }
     if (gpio == BUTTON_B) {
-      if (numero_atual == 0){
-        numero_atual = 9;
-      }
-      else numero_atual = numero_atual - 1; // Alterna entre 0 e 9
+        if (current_time - last_press_time_B > TIME_DEBOUNCE) {
+            last_press_time_B = current_time; // Atualiza o tempo do último pressionamento
+            if (numero_atual == 0) {
+                numero_atual = 9;
+            } else {
+                numero_atual--;
+            }
+        }
     }
 }
 
